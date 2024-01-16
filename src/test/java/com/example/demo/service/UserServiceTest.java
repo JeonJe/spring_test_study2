@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
+import com.example.demo.exception.CertificationCodeNotMatchedException;
 import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.model.UserStatus;
 import com.example.demo.model.dto.UserCreateDto;
 import com.example.demo.model.dto.UserUpdateDto;
 import com.example.demo.repository.UserEntity;
@@ -17,6 +19,7 @@ import org.springframework.test.context.jdbc.SqlGroup;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 
 @SpringBootTest
 @TestPropertySource("classpath:test-application.properties")
@@ -31,7 +34,7 @@ class UserServiceTest {
     @MockBean
     private JavaMailSender javaMailSender;
     @Test
-    void getByEmaul_은_Active_상태인_유저를_찾아올_수_있다(){
+    void getByEmail_은_Active_상태인_유저를_찾아올_수_있다(){
         //given
         String email = "whssodi@gmail.com";
         //when
@@ -82,18 +85,19 @@ class UserServiceTest {
                 .nickname("whssodi")
                 .build();
 
-//        BDDMockito.doNothing().when(javaMailSender).send(any(SimpleMailMessage.class));
+
+        BDDMockito.doNothing().when(javaMailSender).send(any(SimpleMailMessage.class));
         //when
-//        UserEntity userEntity = userService.create(userCreateDto);
-//
-//        //then
-//        assertThat(userEntity.getId()).isNotNull();
-//        assertThat(userEntity.getStatus()).isEqualTo("PENDING");
+        UserEntity userEntity = userService.create(userCreateDto);
+
+        //then
+        assertThat(userEntity.getId()).isNotNull();
+        assertThat(userEntity.getStatus()).isEqualTo(UserStatus.PENDING);
 
     }
 
     @Test
-    void userCreateDto를_이용하여_유저를_수정할_수_있다(){
+    void userUpdateDto를_이용하여_유저를_수정할_수_있다(){
         //given
         UserUpdateDto updateCreateDto = UserUpdateDto.builder()
                 .address("Incheon")
@@ -103,9 +107,47 @@ class UserServiceTest {
         //when
         UserEntity userEntity = userService.update(1, updateCreateDto);
         //then
+        assertThat(userEntity).isNotNull();
         assertThat(userEntity.getAddress()).isEqualTo("Incheon");
+        assertThat(userEntity.getNickname()).isEqualTo("whssodi33");
 
     }
+
+    @Test
+    void user_로그인_시_마지막_로그인_시간이_변경된다(){
+        //given
+        //when
+        userService.login(1);
+        //then
+        UserEntity userEntity = userService.getById(1);
+        assertThat(userEntity).isNotNull();
+        assertThat(userEntity.getLastLoginAt()).isGreaterThan(0L);
+    }
+
+    @Test
+    void PENDING인_유저는_인증_코드로_ACTIVE_시킨다(){
+        //given
+        //when
+        userService.verifyEmail(2, "aaaaaa-aaa-aa");
+        //then
+        UserEntity userEntity = userService.getById(2);
+        assertThat(userEntity).isNotNull();
+        assertThat(userEntity.getStatus()).isEqualTo(UserStatus.ACTIVE);
+    }
+
+    @Test
+    void PENDING인_유저는_잘못된_인증_코드로_ACTIVE_시킬_수_없다(){
+        //given
+        //when
+        //then
+        assertThatThrownBy(() -> {
+            userService.verifyEmail(2, "aaaaaa-aaa-bb");
+        }).isInstanceOf(CertificationCodeNotMatchedException.class);
+    }
+
+
+
+
 
 
 }
