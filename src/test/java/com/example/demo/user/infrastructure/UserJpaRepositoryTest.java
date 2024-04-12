@@ -17,10 +17,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @DataJpaTest(showSql = true)
 @TestPropertySource("classpath:test-application.properties")
 @Sql("/sql/user-repository-test-data.sql")
-public class UserRepositoryTest {
+public class UserJpaRepositoryTest {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserJpaRepository userJpaRepository;
 
     @Test
     void findByIdAndStatus_로_유저_데이터를_찾아올_수_있다(){
@@ -28,7 +28,7 @@ public class UserRepositoryTest {
 
         //when
 
-        Optional<UserEntity> result = userRepository.findByIdAndStatus(1,UserStatus.ACTIVE);
+        Optional<UserEntity> result = userJpaRepository.findByIdAndStatus(1,UserStatus.ACTIVE);
         //then
         assertThat(result.isPresent()).isTrue();
     }
@@ -39,7 +39,7 @@ public class UserRepositoryTest {
 
         //when
 
-        Optional<UserEntity> result = userRepository.findByIdAndStatus(1,UserStatus.PENDING);
+        Optional<UserEntity> result = userJpaRepository.findByIdAndStatus(1,UserStatus.PENDING);
         //then
         assertThat(result.isEmpty()).isTrue();
     }
@@ -50,7 +50,7 @@ public class UserRepositoryTest {
 
         //when
 
-        Optional<UserEntity> result = userRepository.findByEmailAndStatus("whssodi@gmail.com",UserStatus.ACTIVE);
+        Optional<UserEntity> result = userJpaRepository.findByEmailAndStatus("whssodi@gmail.com",UserStatus.ACTIVE);
         //then
         assertThat(result.isPresent()).isTrue();
     }
@@ -61,7 +61,7 @@ public class UserRepositoryTest {
 
         //when
 
-        Optional<UserEntity> result = userRepository.findByEmailAndStatus("whssodi@gmail.com",UserStatus.PENDING);
+        Optional<UserEntity> result = userJpaRepository.findByEmailAndStatus("whssodi@gmail.com",UserStatus.PENDING);
         //then
         assertThat(result.isEmpty()).isTrue();
     }
