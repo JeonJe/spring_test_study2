@@ -2,11 +2,11 @@ package com.example.demo.user.service;
 
 import com.example.demo.common.domain.exception.CertificationCodeNotMatchedException;
 import com.example.demo.common.domain.exception.ResourceNotFoundException;
+import com.example.demo.user.domain.User;
 import com.example.demo.user.domain.UserStatus;
 import com.example.demo.user.domain.UserCreate;
 import com.example.demo.user.domain.UserUpdate;
 import com.example.demo.user.infrastructure.UserEntity;
-import com.example.demo.user.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,10 +39,10 @@ class UserServiceTest {
         //given
         String email = "whssodi@gmail.com";
         //when
-        UserEntity userEntity = userService.getByEmail(email);
+        User user = userService.getByEmail(email);
 
         //then
-        assertThat(userEntity.getNickname()).isEqualTo("whssodi");
+        assertThat(user.getNickname()).isEqualTo("whssodi");
 
     }
     void getByEmail_은_PENDING_상태인_유저를_찾아올_수_없다(){
@@ -51,7 +51,7 @@ class UserServiceTest {
         //when
         //then
         assertThatThrownBy(() -> {
-            UserEntity result = userService.getByEmail(email);
+            User result = userService.getByEmail(email);
         }).isInstanceOf(ResourceNotFoundException.class);
 
     }
@@ -61,10 +61,10 @@ class UserServiceTest {
         //given
 
         //when
-        UserEntity userEntity = userService.getById(1);
+        User user = userService.getById(1);
 
         //then
-        assertThat(userEntity.getNickname()).isEqualTo("whssodi");
+        assertThat(user.getNickname()).isEqualTo("whssodi");
 
     }
     void getById_은_PENDING_상태인_유저를_찾아올_수_없다(){
@@ -72,7 +72,7 @@ class UserServiceTest {
         //when
         //then
         assertThatThrownBy(() -> {
-            UserEntity result = userService.getById(2);
+            User result = userService.getById(2);
         }).isInstanceOf(ResourceNotFoundException.class);
 
     }
@@ -89,11 +89,11 @@ class UserServiceTest {
 
         BDDMockito.doNothing().when(javaMailSender).send(any(SimpleMailMessage.class));
         //when
-        UserEntity userEntity = userService.create(userCreate);
+        User user = userService.create(userCreate);
 
         //then
-        assertThat(userEntity.getId()).isNotNull();
-        assertThat(userEntity.getStatus()).isEqualTo(UserStatus.PENDING);
+        assertThat(user.getId()).isNotNull();
+        assertThat(user.getStatus()).isEqualTo(UserStatus.PENDING);
 
     }
 
@@ -106,11 +106,11 @@ class UserServiceTest {
                 .build();
 
         //when
-        UserEntity userEntity = userService.update(1, updateCreateDto);
+        User user = userService.update(1, updateCreateDto);
         //then
-        assertThat(userEntity).isNotNull();
-        assertThat(userEntity.getAddress()).isEqualTo("Incheon");
-        assertThat(userEntity.getNickname()).isEqualTo("whssodi33");
+        assertThat(user).isNotNull();
+        assertThat(user.getAddress()).isEqualTo("Incheon");
+        assertThat(user.getNickname()).isEqualTo("whssodi33");
 
     }
 
@@ -120,9 +120,9 @@ class UserServiceTest {
         //when
         userService.login(1);
         //then
-        UserEntity userEntity = userService.getById(1);
-        assertThat(userEntity).isNotNull();
-        assertThat(userEntity.getLastLoginAt()).isGreaterThan(0L);
+        User user = userService.getById(1);
+        assertThat(user).isNotNull();
+        assertThat(user.getLastLoginAt()).isGreaterThan(0L);
     }
 
     @Test
@@ -131,9 +131,9 @@ class UserServiceTest {
         //when
         userService.verifyEmail(2, "aaaaaa-aaa-aa");
         //then
-        UserEntity userEntity = userService.getById(2);
-        assertThat(userEntity).isNotNull();
-        assertThat(userEntity.getStatus()).isEqualTo(UserStatus.ACTIVE);
+        User user = userService.getById(2);
+        assertThat(user).isNotNull();
+        assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
     }
 
     @Test

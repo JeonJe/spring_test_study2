@@ -1,5 +1,6 @@
 package com.example.demo.post.service;
 
+import com.example.demo.post.domain.Post;
 import com.example.demo.post.domain.PostCreate;
 import com.example.demo.post.domain.PostUpdate;
 import com.example.demo.post.infrastructure.PostEntity;
@@ -27,12 +28,12 @@ class PostServiceTest {
         //given
         int id = 1;
         //when
-        PostEntity postEntity = postService.getPostById(1);
+        Post post = postService.getPostById(1);
 
         //then
-        assertThat(postEntity).isNotNull();
-        assertThat(postEntity.getContent()).isEqualTo("helloword");
-        assertThat(postEntity.getWriter().getEmail()).isEqualTo("whssodi@gmail.com");
+        assertThat(post).isNotNull();
+        assertThat(post.getContent()).isEqualTo("helloword");
+        assertThat(post.getWriter().getEmail()).isEqualTo("whssodi@gmail.com");
 
 
     }
@@ -46,12 +47,12 @@ class PostServiceTest {
                 .build();
 
         //when
-        PostEntity postEntity = postService.create(postCreate);
+        Post post = postService.create(postCreate);
 
         //then
-        assertThat(postEntity.getId()).isNotNull();
-        assertThat(postEntity.getContent()).isEqualTo("helloword");
-        assertThat(postEntity.getCreatedAt()).isGreaterThan(0L);
+        assertThat(post.getId()).isNotNull();
+        assertThat(post.getContent()).isEqualTo("helloword");
+        assertThat(post.getCreatedAt()).isGreaterThan(0L);
 
     }
 
@@ -63,12 +64,12 @@ class PostServiceTest {
                 .build();
 
         //when
-        PostEntity postEntity = postService.update(1L, postUpdate);
+        Post post = postService.update(1L, postUpdate);
 
         //then
-        assertThat(postEntity.getId()).isNotNull();
-        assertThat(postEntity.getContent()).isEqualTo("helloword22");
-        assertThat(postEntity.getModifiedAt()).isGreaterThan(0L);
+        assertThat(post.getId()).isNotNull();
+        assertThat(post.getContent()).isEqualTo("helloword22");
+        assertThat(post.getModifiedAt()).isGreaterThan(0L);
 
     }
 
