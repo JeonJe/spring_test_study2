@@ -18,6 +18,11 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    public UserEntity save(UserEntity userEntity) {
+        return userJpaRepository.save(userEntity);
+    }
+
+    @Override
     public Optional<UserEntity> findByIdAndStatus(long id, UserStatus userStatus) {
         return userJpaRepository.findByIdAndStatus(id, userStatus);
     }
@@ -27,8 +32,4 @@ public class UserRepositoryImpl implements UserRepository {
         return userJpaRepository.findByEmailAndStatus(email, userStatus);
     }
 
-    @Override
-    public UserEntity save(UserEntity userEntity) {
-        return userJpaRepository.save(userEntity);
-    }
 }

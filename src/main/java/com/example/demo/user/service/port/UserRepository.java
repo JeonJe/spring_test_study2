@@ -6,6 +6,7 @@ import com.example.demo.user.infrastructure.UserEntity;
 import java.util.Optional;
 
 public interface UserRepository {
+
     Optional<UserEntity> findById(long id);
 
     Optional<UserEntity> findByIdAndStatus(long id, UserStatus userStatus);
