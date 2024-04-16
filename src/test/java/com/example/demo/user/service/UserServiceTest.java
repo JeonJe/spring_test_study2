@@ -30,7 +30,6 @@ class UserServiceTest {
     private UserService userService;
 
     //TestFixture
-
     @BeforeEach
     void init() {
         FakeMailSender fakeMailSender = new FakeMailSender();

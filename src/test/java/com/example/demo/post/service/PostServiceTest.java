@@ -1,10 +1,16 @@
 package com.example.demo.post.service;
 
+import com.example.demo.mock.*;
 import com.example.demo.post.domain.Post;
 import com.example.demo.post.domain.PostCreate;
 import com.example.demo.post.domain.PostUpdate;
 import com.example.demo.post.infrastructure.PostEntity;
 import com.example.demo.post.service.PostService;
+import com.example.demo.user.domain.User;
+import com.example.demo.user.domain.UserStatus;
+import com.example.demo.user.service.CertificationService;
+import com.example.demo.user.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,32 +20,58 @@ import org.springframework.test.context.jdbc.SqlGroup;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@SpringBootTest
-@TestPropertySource("classpath:test-application.properties")
-@SqlGroup({
-        @Sql(value = "/sql/post-service-test-data.sql", executionPhase =  Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-        @Sql(value = "/sql/delete-all-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-})
 class PostServiceTest {
-    @Autowired
-    private PostService postService;
-    @Test
-    void getById_존재하는_게시물을_가져온다(){
-        //given
-        int id = 1;
-        //when
-        Post post = postService.getPostById(1);
 
-        //then
-        assertThat(post).isNotNull();
-        assertThat(post.getContent()).isEqualTo("helloword");
-        assertThat(post.getWriter().getEmail()).isEqualTo("whssodi@gmail.com");
+    private PostService postService;
+
+    //TestFixture
+    @BeforeEach
+    void init() {
+        FakePostRepository fakePostRepository = new FakePostRepository();
+        FakeUserRepository fakeUserRepository = new FakeUserRepository();
+
+        this.postService = PostService.builder()
+                .postRepository(fakePostRepository)
+                .userRepository(fakeUserRepository)
+                .clockHolder(new TestClockHolder(1678530673958L))
+                .build();
+        User user1 = User.builder()
+                .id(1L)
+                .email("whssodi@gmail.com")
+                .nickname("whssodi")
+                .address("Seoul")
+                .certificationCode("aaaaaa-aaa-aa")
+                .status(UserStatus.ACTIVE)
+                .lastLoginAt(0L)
+                .build();
+
+        User user2 = User.builder()
+                .id(2L)
+                .email("'whssodi2@gmail.com'")
+                .nickname("whssodi2")
+                .address("Seoul")
+                .certificationCode("aaaaaa-aaa-aa")
+                .status(UserStatus.PENDING)
+                .lastLoginAt(0L)
+                .build();
+
+        fakeUserRepository.save(user1);
+
+        fakeUserRepository.save(user2);
+
+        fakePostRepository.save(Post.builder()
+                .id(1L)
+                .content("hellworld")
+                .createdAt(1678530673958L)
+                .modifiedAt(0L)
+                .writer(user1)
+                .build());
 
 
     }
 
     @Test
-    void postCreateDto를_이용하여_게시물를_생성할_수_있다(){
+    void postCreateDto를_이용하여_게시물를_생성할_수_있다() {
         //given
         PostCreate postCreate = PostCreate.builder()
                 .writerId(1)
@@ -52,12 +84,12 @@ class PostServiceTest {
         //then
         assertThat(post.getId()).isNotNull();
         assertThat(post.getContent()).isEqualTo("helloword");
-        assertThat(post.getCreatedAt()).isGreaterThan(0L);
+        assertThat(post.getCreatedAt()).isEqualTo(1678530673958L);
 
     }
 
     @Test
-    void postUpdateDto를_이용하여_게시물를_수정할_수_있다(){
+    void postUpdateDto를_이용하여_게시물를_수정할_수_있다() {
         //given
         PostUpdate postUpdate = PostUpdate.builder()
                 .content("helloword22")
@@ -69,11 +101,9 @@ class PostServiceTest {
         //then
         assertThat(post.getId()).isNotNull();
         assertThat(post.getContent()).isEqualTo("helloword22");
-        assertThat(post.getModifiedAt()).isGreaterThan(0L);
+        assertThat(post.getModifiedAt()).isEqualTo(1678530673958L);
 
     }
-
-
 
 
 }
