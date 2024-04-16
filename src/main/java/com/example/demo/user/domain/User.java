@@ -1,6 +1,8 @@
 package com.example.demo.user.domain;
 
 import com.example.demo.common.domain.exception.CertificationCodeNotMatchedException;
+import com.example.demo.common.service.ClockHolder;
+import com.example.demo.common.service.UuidHolder;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -28,18 +30,18 @@ public class User {
         this.lastLoginAt = lastLoginAt;
     }
     //도메인에 책임이 생기면서 대응하는 테스트 코드 필요
-    public static User from(UserCreate userCreate) {
+    public static User from(UserCreate userCreate, UuidHolder uuidHolder) {
         return User.builder()
                 .email(userCreate.getEmail())
                 .nickname(userCreate.getNickname())
                 .address(userCreate.getAddress())
                 .status(UserStatus.PENDING)
-                .certificationCode(UUID.randomUUID().toString())
+                .certificationCode(uuidHolder.random())
                 .build();
     }
 
     public User update(UserUpdate userUpdate) {
-        //불편 객체의 변경 결과는 새로우 인스턴스 반환
+        //불편 객체의 변경 결과는 새로운 인스턴스를 반환한다
         return User.builder()
                 .id(id)
                 .email(email)
@@ -51,7 +53,7 @@ public class User {
                 .build();
     }
 
-    public User login() {
+    public User login(ClockHolder clockHolder) {
         return User.builder()
                 .id(id)
                 .email(email)
@@ -59,7 +61,7 @@ public class User {
                 .address(address)
                 .certificationCode(certificationCode)
                 .status(status)
-                .lastLoginAt(Clock.systemUTC().millis())
+                .lastLoginAt(clockHolder.millis())
                 .build();
     }
 
