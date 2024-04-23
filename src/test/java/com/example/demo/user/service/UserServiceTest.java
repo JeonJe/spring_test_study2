@@ -19,10 +19,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 
 class UserServiceTest {
-    public UserReadService userReadService;
-    public  UserCreateService userCreateService;
-    public  UserUpdateService userUpdateService;
-    public  AuthenticationService authenticationService;
+    public UserService userService;
+
     //TestFixture
     @BeforeEach
     void init() {
@@ -36,10 +34,7 @@ class UserServiceTest {
                 .certificationService(new CertificationService(fakeMailSender)) //의존 관게
                 .build();
 
-        this.userCreateService = userService;
-        this.userReadService = userService;
-        this.userUpdateService = userService;
-        this.authenticationService = userService;
+        this.userService = userService;
 
         fakeUserRepository.save(User.builder()
                 .id(1L)
@@ -69,7 +64,7 @@ class UserServiceTest {
         //given
         String email = "whssodi@gmail.com";
         //when
-        User user = userReadService.getByEmail(email);
+        User user = userService.getByEmail(email);
 
         //then
         assertThat(user.getNickname()).isEqualTo("whssodi");
@@ -82,7 +77,7 @@ class UserServiceTest {
         //when
         //then
         assertThatThrownBy(() -> {
-            User result = userReadService.getByEmail(email);
+            User result = userService.getByEmail(email);
         }).isInstanceOf(ResourceNotFoundException.class);
 
     }
@@ -92,7 +87,7 @@ class UserServiceTest {
         //given
 
         //when
-        User user = userReadService.getById(1);
+        User user = userService.getById(1);
 
         //then
         assertThat(user.getNickname()).isEqualTo("whssodi");
@@ -104,7 +99,7 @@ class UserServiceTest {
         //when
         //then
         assertThatThrownBy(() -> {
-            User result = userReadService.getById(2);
+            User result = userService.getById(2);
         }).isInstanceOf(ResourceNotFoundException.class);
 
     }
@@ -119,7 +114,7 @@ class UserServiceTest {
                 .build();
 
         //when
-        User user = userCreateService.create(userCreate);
+        User user = userService.create(userCreate);
 
         //then
         assertThat(user.getId()).isNotNull();
@@ -137,7 +132,7 @@ class UserServiceTest {
                 .build();
 
         //when
-        User user = userUpdateService.update(1, updateCreateDto);
+        User user = userService.update(1, updateCreateDto);
         //then
         assertThat(user).isNotNull();
         assertThat(user.getAddress()).isEqualTo("Incheon");
@@ -149,9 +144,9 @@ class UserServiceTest {
     void user_로그인_시_마지막_로그인_시간이_변경된다() {
         //given
         //when
-        authenticationService.login(1);
+        userService.login(1);
         //then
-        User user = userReadService.getById(1);
+        User user = userService.getById(1);
         assertThat(user).isNotNull();
         assertThat(user.getLastLoginAt()).isEqualTo(1678530673958L);
 
@@ -161,9 +156,9 @@ class UserServiceTest {
     void PENDING인_유저는_인증_코드로_ACTIVE_시킨다() {
         //given
         //when
-        authenticationService.verifyEmail(2, "aaaaaa-aaa-aa");
+        userService.verifyEmail(2, "aaaaaa-aaa-aa");
         //then
-        User user = userReadService.getById(2);
+        User user = userService.getById(2);
         assertThat(user).isNotNull();
         assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
     }
@@ -174,7 +169,7 @@ class UserServiceTest {
         //when
         //then
         assertThatThrownBy(() -> {
-            authenticationService.verifyEmail(2, "aaaaaa-aaa-bb");
+            userService.verifyEmail(2, "aaaaaa-aaa-bb");
         }).isInstanceOf(CertificationCodeNotMatchedException.class);
     }
 

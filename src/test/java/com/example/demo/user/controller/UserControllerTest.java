@@ -62,7 +62,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void 사용자는_인증코드로_계정을_활성화_할_수_있다() throws Exception {
+    void 사용자는_인증코드로_계정을_활성화_할_수_있다() {
         //given
         TestContainer testContainer = TestContainer.builder()
                 .build();
@@ -109,7 +109,7 @@ public class UserControllerTest {
         assertThat((result.getBody().getNickname())).isEqualTo("whssodi");
         assertThat((result.getBody().getAddress())).isEqualTo("Seoul");
         assertThat((result.getBody().getStatus())).isEqualTo(UserStatus.ACTIVE);
-        assertThat((result.getBody().getLastLoginAt())).isEqualTo(100L);
+        assertThat((result.getBody().getLastLoginAt())).isEqualTo(1678530673958L);
 
     }
 
