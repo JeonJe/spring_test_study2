@@ -6,41 +6,40 @@ import com.example.demo.mock.FakeMailSender;
 import com.example.demo.mock.FakeUserRepository;
 import com.example.demo.mock.TestClockHolder;
 import com.example.demo.mock.TestUuidHolder;
+import com.example.demo.user.controller.port.*;
 import com.example.demo.user.domain.User;
 import com.example.demo.user.domain.UserCreate;
 import com.example.demo.user.domain.UserStatus;
 import com.example.demo.user.domain.UserUpdate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlGroup;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 
 class UserServiceTest {
-    private UserService userService;
-
+    public UserReadService userReadService;
+    public  UserCreateService userCreateService;
+    public  UserUpdateService userUpdateService;
+    public  AuthenticationService authenticationService;
     //TestFixture
     @BeforeEach
     void init() {
         FakeMailSender fakeMailSender = new FakeMailSender();
         FakeUserRepository fakeUserRepository = new FakeUserRepository();
 
-        this.userService = UserService.builder()
+        UserServiceImpl userService = UserServiceImpl.builder()
                 .uuidHolder(new TestUuidHolder("aaa-aa-a")) //고정된 값만 내려주는 stub으로 대체
                 .clockHolder(new TestClockHolder(1678530673958L)) //고정된 값을
                 .userRepository(fakeUserRepository)
                 .certificationService(new CertificationService(fakeMailSender)) //의존 관게
                 .build();
+
+        this.userCreateService = userService;
+        this.userReadService = userService;
+        this.userUpdateService = userService;
+        this.authenticationService = userService;
 
         fakeUserRepository.save(User.builder()
                 .id(1L)
@@ -70,7 +69,7 @@ class UserServiceTest {
         //given
         String email = "whssodi@gmail.com";
         //when
-        User user = userService.getByEmail(email);
+        User user = userReadService.getByEmail(email);
 
         //then
         assertThat(user.getNickname()).isEqualTo("whssodi");
@@ -83,7 +82,7 @@ class UserServiceTest {
         //when
         //then
         assertThatThrownBy(() -> {
-            User result = userService.getByEmail(email);
+            User result = userReadService.getByEmail(email);
         }).isInstanceOf(ResourceNotFoundException.class);
 
     }
@@ -93,7 +92,7 @@ class UserServiceTest {
         //given
 
         //when
-        User user = userService.getById(1);
+        User user = userReadService.getById(1);
 
         //then
         assertThat(user.getNickname()).isEqualTo("whssodi");
@@ -105,7 +104,7 @@ class UserServiceTest {
         //when
         //then
         assertThatThrownBy(() -> {
-            User result = userService.getById(2);
+            User result = userReadService.getById(2);
         }).isInstanceOf(ResourceNotFoundException.class);
 
     }
@@ -120,7 +119,7 @@ class UserServiceTest {
                 .build();
 
         //when
-        User user = userService.create(userCreate);
+        User user = userCreateService.create(userCreate);
 
         //then
         assertThat(user.getId()).isNotNull();
@@ -138,7 +137,7 @@ class UserServiceTest {
                 .build();
 
         //when
-        User user = userService.update(1, updateCreateDto);
+        User user = userUpdateService.update(1, updateCreateDto);
         //then
         assertThat(user).isNotNull();
         assertThat(user.getAddress()).isEqualTo("Incheon");
@@ -150,9 +149,9 @@ class UserServiceTest {
     void user_로그인_시_마지막_로그인_시간이_변경된다() {
         //given
         //when
-        userService.login(1);
+        authenticationService.login(1);
         //then
-        User user = userService.getById(1);
+        User user = userReadService.getById(1);
         assertThat(user).isNotNull();
         assertThat(user.getLastLoginAt()).isEqualTo(1678530673958L);
 
@@ -162,9 +161,9 @@ class UserServiceTest {
     void PENDING인_유저는_인증_코드로_ACTIVE_시킨다() {
         //given
         //when
-        userService.verifyEmail(2, "aaaaaa-aaa-aa");
+        authenticationService.verifyEmail(2, "aaaaaa-aaa-aa");
         //then
-        User user = userService.getById(2);
+        User user = userReadService.getById(2);
         assertThat(user).isNotNull();
         assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
     }
@@ -175,7 +174,7 @@ class UserServiceTest {
         //when
         //then
         assertThatThrownBy(() -> {
-            userService.verifyEmail(2, "aaaaaa-aaa-bb");
+            authenticationService.verifyEmail(2, "aaaaaa-aaa-bb");
         }).isInstanceOf(CertificationCodeNotMatchedException.class);
     }
 
